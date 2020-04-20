@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using TDApi.Models.Auth;
 
 namespace TDApi.Models
 {
@@ -11,6 +14,23 @@ namespace TDApi.Models
         {
             using (var context = new FilmsContext())
             {
+                if (context.Users.Any())
+                {
+                    return;
+                }
+                string password = "test";
+                byte[] salt = Encoding.ASCII.GetBytes("8536C97DCAB7D4BFB3325EAB634FA");  //utiliser la clé secrète de appsettings 
+                string pwdhashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                        password: password,
+                        salt: salt,
+                        prf: KeyDerivationPrf.HMACSHA256,
+                        iterationCount: 10000,
+                        numBytesRequested: 256 / 8));
+
+                context.Users.Add(
+                    new User { Username = "test", FirstName = "Test", LastName = "Test", Password = pwdhashed }
+                );
+
                 if (context.Films.Any())
                 {
                     return;   // DB has been seeded !
@@ -52,6 +72,8 @@ namespace TDApi.Models
                             GenreId = 3,
                             Note = 4
                         });
+
+
 
                 context.SaveChanges();
             }

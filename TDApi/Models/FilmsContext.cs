@@ -3,12 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TDApi.Models.Auth;
 
 namespace TDApi.Models
 {
     public class FilmsContext : DbContext
     {
         //Les entités gérées par le DbContext
+        public DbSet<User> Users { get; set; }
         public DbSet<Film> Films { get; set; }
         public DbSet<Genre> Genres { get; set; }
 
