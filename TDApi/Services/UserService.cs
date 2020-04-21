@@ -49,13 +49,9 @@ namespace TDApi.Services
 
                 SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
                 return new AuthenticateToken { Token = tokenHandler.WriteToken(token) };
-               /* return new AuthenticateToken { Token = token.ToString() };*/
-
             }
         }
-
      
-
         //génération du hash du pwd
         private string GenerateHashPwd(string password)
         {

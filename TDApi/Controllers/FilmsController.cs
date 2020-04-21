@@ -23,10 +23,40 @@ namespace TDApi.Controllers
         }
 
         // GET: api/Films
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Film>>> GetFilms()
+        public async Task<IActionResult> GetFilms(int pageSize = 10, int pageNumber = 1, int? lastEditedBy = null, int? colorID = null, int? outerPackageID = null, int? supplierID = null, int? unitPackageID = null)
         {
-            return await _context.Films.ToListAsync();
+/*            var items = await _context.Films.ToListAsync();
+            return Ok(items);*/
+
+            var response = new PagedResponse<Film>();
+
+            try
+            {
+                // Get the "proposed" query from repository
+                var query = _context.GetStockItems();
+
+                // Set paging values
+                response.PageSize = pageSize;
+                response.PageNumber = pageNumber;
+
+                // Get the total rows
+                response.ItemsCount = await query.CountAsync();
+
+                // Get the specific page from database
+                response.Model = await query.Paging(pageSize, pageNumber).ToListAsync();
+
+                response.Message = string.Format("Page {0} of {1}, Total of products: {2}.", pageNumber, response.PageCount, response.ItemsCount);
+            }
+            catch (Exception ex)
+            {
+                response.DidError = true;
+                response.ErrorMessage = "There was an internal error, please contact to technical support.";
+
+            }
+
+            return response.ToHttpResponse();
         }
 
         // GET: api/Films/5
@@ -40,7 +70,7 @@ namespace TDApi.Controllers
                 return NotFound();
             }
 
-            return film;
+            return Ok(film);
         }
 
         // PUT: api/Films/5
@@ -100,7 +130,7 @@ namespace TDApi.Controllers
             _context.Films.Remove(film);
             await _context.SaveChangesAsync();
 
-            return film;
+            return Ok(film);
         }
 
         private bool FilmExists(int id)
